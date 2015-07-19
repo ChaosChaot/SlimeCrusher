@@ -11,11 +11,7 @@ import net.minecraft.entity.player.InventoryPlayer;
 public class GuiLoadingStation extends GuiSlimeCrasherMod {
 
    public GuiLoadingStation(InventoryPlayer playerInventory, TileEntityLoadingStation te) {
-      super(new ContainerLoadingStation(playerInventory, te));
+      super(new ContainerLoadingStation(playerInventory, te),"GuiLoadingStation");
    }
 
-   @Override
-   protected void drawGuiContainerBackgroundLayer(float p_146976_1_, int p_146976_2_, int p_146976_3_) {
-
-   }
 }

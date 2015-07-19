@@ -7,6 +7,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.ISidedInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
 import net.minecraft.tileentity.TileEntity;
 
 public class TileEntityLoadingStation extends TileEntity implements ISidedInventory {
@@ -16,7 +17,6 @@ public class TileEntityLoadingStation extends TileEntity implements ISidedInvent
    protected String customName;
 
    private ItemStack[] stationStacks = new ItemStack[7];
-   private ItemStack testStack;
 
    private static final int[] slotsTop = new int[] {0, 1, 2, 3, 4, 5};
    private static final int[] slotsBottom = new int[] {};
@@ -41,36 +41,6 @@ public class TileEntityLoadingStation extends TileEntity implements ISidedInvent
    @Override
    public ItemStack decrStackSize(int slot, int decreaseAmount)
    {
-      /*
-      if (this.stationStacks[slot] != null)
-      {
-         ItemStack itemstack;
-
-         if (this.stationStacks[slot].stackSize <= decreaseAmount)
-         {
-            itemstack = this.stationStacks[slot];
-            this.stationStacks[slot] = null;
-            this.markDirty();
-            return itemstack;
-         }
-         else
-         {
-            itemstack = this.stationStacks[slot].splitStack(decreaseAmount);
-
-            if (this.stationStacks[slot].stackSize == 0)
-            {
-               this.stationStacks[slot] = null;
-            }
-
-            this.markDirty();
-            return itemstack;
-         }
-      }
-      else
-      {
-         return null;
-      }
-      */
       ItemStack stack = getStackInSlot(slot);
       if (stack != null) {
          if (stack.stackSize <= decreaseAmount) {
@@ -88,18 +58,7 @@ public class TileEntityLoadingStation extends TileEntity implements ISidedInvent
    @Override
    public ItemStack getStackInSlotOnClosing(int slot)
    {
-      /*
-      if (this.stationStacks[slot] != null)
-      {
-         ItemStack itemstack = this.stationStacks[slot];
-         this.stationStacks[slot] = null;
-         return itemstack;
-      }
-      else
-      {
-         return null;
-      }
-      */
+
       ItemStack stack = getStackInSlot(slot);
       if (stack != null) {
          setInventorySlotContents(slot, null);
@@ -110,22 +69,26 @@ public class TileEntityLoadingStation extends TileEntity implements ISidedInvent
    @Override
    public void setInventorySlotContents(int slot, ItemStack stack)
    {
-      this.stationStacks[slot] = stack;
-      if (stack != null && stack.stackSize > this.getInventoryStackLimit()) {
-         stack.stackSize = this.getInventoryStackLimit();
+      if(!worldObj.isRemote) {
+         if (stack.getItem() instanceof ItemCompressedSlimeball || stack.getItem() instanceof ItemSlimeCrasher) {
+            this.stationStacks[slot] = stack;
+            if (stack != null && stack.stackSize > this.getInventoryStackLimit()) {
+               stack.stackSize = this.getInventoryStackLimit();
+            }
+         }
       }
    }
 
    @Override
    public String getInventoryName()
    {
-      return this.hasCustomInventoryName() ? this.customName : ModBlocks.loadingStation.getUnlocalizedName() + ".name";
+      return  ModBlocks.loadingStation.getUnlocalizedName() + ".name";
    }
 
    @Override
    public boolean hasCustomInventoryName()
    {
-      return this.customName != null;
+      return false;
    }
 
    @Override
@@ -134,6 +97,27 @@ public class TileEntityLoadingStation extends TileEntity implements ISidedInvent
       super.readFromNBT(tag);
 
 
+      NBTTagList nbttaglist = tag.getTagList("Items", 10);
+      this.stationStacks = new ItemStack[this.getSizeInventory()];
+
+      /* TODO: Allow custom name
+      if (tag.hasKey("CustomName", 8))
+      {
+         this.customName = tag.getString("CustomName");
+      }
+      */
+
+      for (int i = 0; i < nbttaglist.tagCount(); ++i)
+      {
+         NBTTagCompound nbttagcompound1 = nbttaglist.getCompoundTagAt(i);
+         int j = nbttagcompound1.getByte("Slot") & 255;
+
+         if (j >= 0 && j < this.stationStacks.length)
+         {
+            this.stationStacks[j] = ItemStack.loadItemStackFromNBT(nbttagcompound1);
+         }
+      }
+
    }
 
    @Override
@@ -141,7 +125,20 @@ public class TileEntityLoadingStation extends TileEntity implements ISidedInvent
    {
       super.writeToNBT(tag);
 
-      NBTTagCompound t = new NBTTagCompound();
+      NBTTagList nbttaglist = new NBTTagList();
+
+      for (int i = 0; i < this.stationStacks.length; ++i)
+      {
+         if (this.stationStacks[i] != null)
+         {
+            NBTTagCompound nbttagcompound1 = new NBTTagCompound();
+            nbttagcompound1.setByte("Slot", (byte)i);
+            this.stationStacks[i].writeToNBT(nbttagcompound1);
+            nbttaglist.appendTag(nbttagcompound1);
+         }
+      }
+
+      tag.setTag("Items", nbttaglist);
 
    }
 
