@@ -69,14 +69,13 @@ public class TileEntityLoadingStation extends TileEntity implements ISidedInvent
    @Override
    public void setInventorySlotContents(int slot, ItemStack stack)
    {
-      if(!worldObj.isRemote) {
-         if (stack.getItem() instanceof ItemCompressedSlimeball || stack.getItem() instanceof ItemSlimeCrasher) {
-            this.stationStacks[slot] = stack;
-            if (stack != null && stack.stackSize > this.getInventoryStackLimit()) {
-               stack.stackSize = this.getInventoryStackLimit();
-            }
+         //if (stack.getItem() == ModItems.compressedSlimeball || stack.getItem() == ModItems.slimeCrasher) {
+         this.stationStacks[slot] = stack;
+         if (stack != null && stack.stackSize > this.getInventoryStackLimit()) {
+            stack.stackSize = this.getInventoryStackLimit();
          }
-      }
+         //}
+
    }
 
    @Override

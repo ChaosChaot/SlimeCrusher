@@ -1,9 +1,10 @@
 package de.chaoschaot.slimecrasher.inventory;
 
+import de.chaoschaot.slimecrasher.inventory.slots.SlotCompressedSlimeball;
+import de.chaoschaot.slimecrasher.inventory.slots.SlotSlimeCrasher;
 import de.chaoschaot.slimecrasher.tileentities.TileEntityLoadingStation;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
-import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 
 public class ContainerLoadingStation extends ContainerSlimeCrasherMod {
@@ -12,13 +13,13 @@ public class ContainerLoadingStation extends ContainerSlimeCrasherMod {
 
    public ContainerLoadingStation(InventoryPlayer playerInventory, TileEntityLoadingStation te) {
 
-      this.addSlotToContainer(new Slot(te, 0, 62, 20));
-      this.addSlotToContainer(new Slot(te, 1, 80, 20));
-      this.addSlotToContainer(new Slot(te, 2, 98, 20));
-      this.addSlotToContainer(new Slot(te, 3, 62, 38));
-      this.addSlotToContainer(new Slot(te, 4, 80, 38));
-      this.addSlotToContainer(new Slot(te, 5, 98, 38));
-      this.addSlotToContainer(new Slot(te, 6, 80, 96));
+      this.addSlotToContainer(new SlotCompressedSlimeball(te, 0, 62, 20));
+      this.addSlotToContainer(new SlotCompressedSlimeball(te, 1, 80, 20));
+      this.addSlotToContainer(new SlotCompressedSlimeball(te, 2, 98, 20));
+      this.addSlotToContainer(new SlotCompressedSlimeball(te, 3, 62, 38));
+      this.addSlotToContainer(new SlotCompressedSlimeball(te, 4, 80, 38));
+      this.addSlotToContainer(new SlotCompressedSlimeball(te, 5, 98, 38));
+      this.addSlotToContainer(new SlotSlimeCrasher(te, 6, 80, 96));
 
 
       this.addPlayerSlots(playerInventory, 8, 132);
