@@ -3,6 +3,7 @@ package de.chaoschaot.slimecrasher.tileentities;
 import de.chaoschaot.slimecrasher.blocks.ModBlocks;
 import de.chaoschaot.slimecrasher.items.ItemCompressedSlimeball;
 import de.chaoschaot.slimecrasher.items.ItemSlimeCrasher;
+import net.minecraft.enchantment.Enchantment;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.ISidedInventory;
 import net.minecraft.item.ItemStack;
@@ -10,11 +11,13 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.tileentity.TileEntity;
 
+import java.util.Random;
+
 public class TileEntityLoadingStation extends TileEntity implements ISidedInventory {
 
    public static final String publicName = "tileEntityLoadingStation";
    private String name = "tileEntityLoadingStation";
-   protected String customName;
+   protected Random rand;
 
    private ItemStack[] stationStacks = new ItemStack[7];
 
@@ -22,6 +25,11 @@ public class TileEntityLoadingStation extends TileEntity implements ISidedInvent
    private static final int[] slotsBottom = new int[] {};
    private static final int[] slotsSides = new int[] {6};
 
+   private static final int[] inputSlots = new int[] {0, 1, 2, 3, 4, 5};
+   private static final int outputSlot = 6;
+   // How much item usage will restored
+   private static final int fuelAmount = 5;
+   private static int cooldownTicks = 40;
 
    public String getName() {
       return name;
@@ -94,7 +102,7 @@ public class TileEntityLoadingStation extends TileEntity implements ISidedInvent
    public void readFromNBT(NBTTagCompound tag)
    {
       super.readFromNBT(tag);
-
+      tag.getInteger("cooldownTicks");
 
       NBTTagList nbttaglist = tag.getTagList("Items", 10);
       this.stationStacks = new ItemStack[this.getSizeInventory()];
@@ -123,7 +131,7 @@ public class TileEntityLoadingStation extends TileEntity implements ISidedInvent
    public void writeToNBT(NBTTagCompound tag)
    {
       super.writeToNBT(tag);
-
+      tag.setInteger("cooldownTicks", cooldownTicks);
       NBTTagList nbttaglist = new NBTTagList();
 
       for (int i = 0; i < this.stationStacks.length; ++i)
@@ -148,6 +156,24 @@ public class TileEntityLoadingStation extends TileEntity implements ISidedInvent
    }
 
    @Override
+   public void updateEntity() {
+      if (!worldObj.isRemote) {
+         if (itemsInInputSlots() && damagedItemInOutputSlot()) {
+            if (cooldownTicks <= 0) {
+               if (consumeCompressedSlimeball()) {
+                  cooldownTicks = 60;
+                  this.markDirty();
+               } else {
+                  cooldownTicks = 10;
+               }
+            } else {
+               cooldownTicks--;
+            }
+         }
+      }
+   }
+
+   @Override
    public boolean isUseableByPlayer(EntityPlayer player)
    {
       return this.worldObj.getTileEntity(this.xCoord, this.yCoord, this.zCoord) != this ? false : player.getDistanceSq((double)this.xCoord + 0.5D, (double)this.yCoord + 0.5D, (double)this.zCoord + 0.5D) <= 64.0D;
@@ -160,8 +186,7 @@ public class TileEntityLoadingStation extends TileEntity implements ISidedInvent
    public void closeInventory() {}
 
    @Override
-   public boolean isItemValidForSlot(int slot, ItemStack stack)
-   {
+   public boolean isItemValidForSlot(int slot, ItemStack stack) {
       return stack != null && (stack.getItem() instanceof ItemCompressedSlimeball || stack.getItem() instanceof ItemSlimeCrasher);
    }
 
@@ -178,5 +203,44 @@ public class TileEntityLoadingStation extends TileEntity implements ISidedInvent
    @Override
    public boolean canExtractItem(int slot, ItemStack stack, int side) {
       return true;
+   }
+
+   public boolean itemsInInputSlots() {
+      for(int slot : inputSlots) {
+         if(this.stationStacks[slot] != null) {
+            return true;
+         }
+      }
+      return false;
+   }
+
+   public boolean damagedItemInOutputSlot() {
+      if (this.stationStacks[outputSlot] != null) {
+         if (this.stationStacks[outputSlot].isItemDamaged()) {
+            return true;
+         }
+      }
+      return false;
+   }
+
+
+   public boolean consumeCompressedSlimeball() {
+      ItemStack slimeCrasher = this.stationStacks[outputSlot];
+      if (slimeCrasher != null
+            && slimeCrasher.isItemDamaged()) {
+         for (int slot : inputSlots) {
+            if (this.stationStacks[slot] != null) {
+               if ((--this.stationStacks[slot].stackSize) <= 0) {
+                  this.stationStacks[slot] = null;
+               }
+               int max = Math.max(slimeCrasher.getItemDamage() - fuelAmount, 0);
+               slimeCrasher.setItemDamage(max);
+
+               slimeCrasher.addEnchantment(Enchantment.unbreaking,2);
+               return true;
+            }
+         }
+      }
+      return false;
    }
 }
