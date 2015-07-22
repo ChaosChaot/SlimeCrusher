@@ -3,7 +3,6 @@ package de.chaoschaot.slimecrasher.tileentities;
 import de.chaoschaot.slimecrasher.blocks.ModBlocks;
 import de.chaoschaot.slimecrasher.items.ItemCompressedSlimeball;
 import de.chaoschaot.slimecrasher.items.ItemSlimeCrasher;
-import net.minecraft.enchantment.Enchantment;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.ISidedInventory;
 import net.minecraft.item.ItemStack;
@@ -11,13 +10,10 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.tileentity.TileEntity;
 
-import java.util.Random;
-
 public class TileEntityLoadingStation extends TileEntity implements ISidedInventory {
 
    public static final String publicName = "tileEntityLoadingStation";
    private String name = "tileEntityLoadingStation";
-   protected Random rand;
 
    private ItemStack[] stationStacks = new ItemStack[7];
 
@@ -236,7 +232,7 @@ public class TileEntityLoadingStation extends TileEntity implements ISidedInvent
                int max = Math.max(slimeCrasher.getItemDamage() - fuelAmount, 0);
                slimeCrasher.setItemDamage(max);
 
-               slimeCrasher.addEnchantment(Enchantment.unbreaking,2);
+               //slimeCrasher.addEnchantment(Enchantment.unbreaking,2);
                return true;
             }
          }
