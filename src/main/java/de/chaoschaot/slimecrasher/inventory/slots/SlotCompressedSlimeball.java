@@ -14,7 +14,9 @@ public class SlotCompressedSlimeball extends Slot {
 
    @Override
    public boolean isItemValid(ItemStack stack) {
-      return stack.getItem() == ModItems.compressedSlimeball;
+
+      return (stack.getItem() == ModItems.compressedSlimeball /* ||
+            stack.getUnlocalizedName().equals("item.netherCrystal")*/);
    }
 
    @Override

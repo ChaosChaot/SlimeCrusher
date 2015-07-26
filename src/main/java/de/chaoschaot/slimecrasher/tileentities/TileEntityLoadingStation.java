@@ -1,8 +1,12 @@
 package de.chaoschaot.slimecrasher.tileentities;
 
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import de.chaoschaot.slimecrasher.blocks.ModBlocks;
 import de.chaoschaot.slimecrasher.items.ItemCompressedSlimeball;
 import de.chaoschaot.slimecrasher.items.ItemSlimeCrasher;
+import de.chaoschaot.slimecrasher.items.ModItems;
+import net.minecraft.enchantment.Enchantment;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.ISidedInventory;
 import net.minecraft.item.ItemStack;
@@ -23,9 +27,14 @@ public class TileEntityLoadingStation extends TileEntity implements ISidedInvent
 
    private static final int[] inputSlots = new int[] {0, 1, 2, 3, 4, 5};
    private static final int outputSlot = 6;
-   // How much item usage will restored
+   /** How much item usage will restored */
    private static final int fuelAmount = 5;
-   private static int cooldownTicks = 40;
+   public int cooldownTicks = 100;
+
+   /** Ticks - How long the Item in input slot will be consumed -> - */
+   public int itemUseTicks;
+   /** Ticks - How long its actually used -> + */
+   public int itemFillTicks;
 
    public String getName() {
       return name;
@@ -62,7 +71,6 @@ public class TileEntityLoadingStation extends TileEntity implements ISidedInvent
    @Override
    public ItemStack getStackInSlotOnClosing(int slot)
    {
-
       ItemStack stack = getStackInSlot(slot);
       if (stack != null) {
          setInventorySlotContents(slot, null);
@@ -73,13 +81,10 @@ public class TileEntityLoadingStation extends TileEntity implements ISidedInvent
    @Override
    public void setInventorySlotContents(int slot, ItemStack stack)
    {
-         //if (stack.getItem() == ModItems.compressedSlimeball || stack.getItem() == ModItems.slimeCrasher) {
          this.stationStacks[slot] = stack;
          if (stack != null && stack.stackSize > this.getInventoryStackLimit()) {
             stack.stackSize = this.getInventoryStackLimit();
          }
-         //}
-
    }
 
    @Override
@@ -98,7 +103,8 @@ public class TileEntityLoadingStation extends TileEntity implements ISidedInvent
    public void readFromNBT(NBTTagCompound tag)
    {
       super.readFromNBT(tag);
-      tag.getInteger("cooldownTicks");
+      itemFillTicks = tag.getInteger("itemFillTicks");
+      itemUseTicks = tag.getInteger("itemUseTicks");
 
       NBTTagList nbttaglist = tag.getTagList("Items", 10);
       this.stationStacks = new ItemStack[this.getSizeInventory()];
@@ -127,7 +133,9 @@ public class TileEntityLoadingStation extends TileEntity implements ISidedInvent
    public void writeToNBT(NBTTagCompound tag)
    {
       super.writeToNBT(tag);
-      tag.setInteger("cooldownTicks", cooldownTicks);
+      tag.setInteger("itemFillTicks", itemFillTicks);
+      tag.setInteger("itemUseTicks", itemUseTicks);
+
       NBTTagList nbttaglist = new NBTTagList();
 
       for (int i = 0; i < this.stationStacks.length; ++i)
@@ -151,20 +159,29 @@ public class TileEntityLoadingStation extends TileEntity implements ISidedInvent
       return 64;
    }
 
+   @SideOnly(Side.CLIENT)
+   public int getFilledProgress(int ticks) {
+      return this.itemFillTicks * ticks / 200;
+   }
+
+
+
    @Override
    public void updateEntity() {
       if (!worldObj.isRemote) {
          if (itemsInInputSlots() && damagedItemInOutputSlot()) {
-            if (cooldownTicks <= 0) {
-               if (consumeCompressedSlimeball()) {
-                  cooldownTicks = 60;
-                  this.markDirty();
-               } else {
-                  cooldownTicks = 10;
+            ++this.itemFillTicks;
+            /*Todo: Switch für Spezialitem einbauen*/
+            if (this.itemFillTicks == this.cooldownTicks) {
+               this.itemFillTicks = 0;
+               if (itemsInInputSlots()) {
+                  chooseItem();
                }
-            } else {
-               cooldownTicks--;
+
+               this.markDirty();
             }
+         } else {
+            this.itemFillTicks = 0;
          }
       }
    }
@@ -219,7 +236,28 @@ public class TileEntityLoadingStation extends TileEntity implements ISidedInvent
       return false;
    }
 
+   /**
+    * Handle the selection of items that are
+    * allowed to consume!
+    */
+   public void chooseItem() {
+      for(int slot : inputSlots) {
+         if(this.stationStacks[slot] != null) {
+            if (this.stationStacks[slot].getItem() == ModItems.compressedSlimeball) {
+               consumeCompressedSlimeball();
+            }
+            /** Curently disabled ;)
+            else if (this.stationStacks[slot].getUnlocalizedName().equals("item.netherCrystal")) {
+               consumeSpecialItem();
+            } */
+         }
+      }
+   }
 
+   /**
+    * Handle the consume of an compressedSlimeball
+    * @return true if consumed
+    */
    public boolean consumeCompressedSlimeball() {
       ItemStack slimeCrasher = this.stationStacks[outputSlot];
       if (slimeCrasher != null
@@ -231,8 +269,29 @@ public class TileEntityLoadingStation extends TileEntity implements ISidedInvent
                }
                int max = Math.max(slimeCrasher.getItemDamage() - fuelAmount, 0);
                slimeCrasher.setItemDamage(max);
+               return true;
+            }
+         }
+      }
+      return false;
+   }
 
-               //slimeCrasher.addEnchantment(Enchantment.unbreaking,2);
+   /**
+    * Handle the consum of the "special" item :)
+    * @return true if item is consumed
+    */
+   public boolean consumeSpecialItem() {
+      ItemStack slimeCrasher = this.stationStacks[outputSlot];
+      if (slimeCrasher != null
+            && slimeCrasher.isItemDamaged()) {
+         for (int slot : inputSlots) {
+            ItemStack item = this.stationStacks[slot];
+            if (item != null) {
+               int max = Math.max(slimeCrasher.getItemDamage() - (item.getMaxDamage() / 2), 0);
+               item.setItemDamage(max);
+
+               slimeCrasher.addEnchantment(Enchantment.unbreaking, 2);
+               slimeCrasher.addEnchantment(Enchantment.respiration, 2);
                return true;
             }
          }
