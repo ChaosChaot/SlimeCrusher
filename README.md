@@ -8,7 +8,7 @@ It adds an Item named "Slime Crasher", with this "wrench"-like Tool, you can rig
 
 It consumes some "energy" in the form of compressed Slimeballs wich are also included :D
 
-To load your Slime Crasher, i've added a Loading Station that will consume compressed Slimeballs wo load your Slime Crasher.
+To load your Slime Crasher, I've added a Loading Station that will consume compressed Slimeballs which load your Slime Crasher.
 
 **Can I include Slime Crasher in my Modpack?**
 
