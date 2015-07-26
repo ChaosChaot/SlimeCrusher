@@ -37,6 +37,7 @@ public class SlimeCrasher {
         ModBlocks.init();
         ModItems.init();
         ModItems.initRecipes();
+        ModBlocks.initRecipes();
     }
 
     @Mod.EventHandler
