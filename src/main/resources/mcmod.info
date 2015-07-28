@@ -2,7 +2,7 @@
   "modListVersion": 2,
   "modList": [{
     "modid": "slimecrasher",
-    "name": "Slime Crasher",
+    "name": "Slime Crusher",
     "description": "KILL ALL THE SLIMES!",
     "version": "{$version}",
     "mcversion": "{$mcversion}",
