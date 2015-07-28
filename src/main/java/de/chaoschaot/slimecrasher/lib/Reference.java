@@ -3,7 +3,7 @@ package de.chaoschaot.slimecrasher.lib;
 
 public class Reference {
    public static final String MODID = "slimecrasher";
-   public static final String MODNAME = "Slime Crasher";
+   public static final String MODNAME = "Slime Crusher";
    public static final String VERSION = "0.3.1";
 
    public static final String CLIENT_PROXY_CLASS = "de.chaoschaot.slimecrasher.proxy.ClientProxy";
