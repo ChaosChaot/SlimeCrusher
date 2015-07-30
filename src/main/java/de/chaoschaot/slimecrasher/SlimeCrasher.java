@@ -11,6 +11,7 @@ import de.chaoschaot.slimecrasher.gui.GuiHandler;
 import de.chaoschaot.slimecrasher.items.ModItems;
 import de.chaoschaot.slimecrasher.lib.Reference;
 import de.chaoschaot.slimecrasher.proxy.CommonProxy;
+import de.npe.gameanalytics.minecraft.MCSimpleAnalytics;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.Item;
 
@@ -23,6 +24,7 @@ public class SlimeCrasher {
 
    @Mod.Instance(Reference.MODID)
    public static SlimeCrasher instance;
+   public static MCSimpleAnalytics analytics;
 
     public static CreativeTabs slimecrasherTab = new CreativeTabs(Reference.MODID) {
         @Override
@@ -34,6 +36,7 @@ public class SlimeCrasher {
     @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent event)
     {
+        analytics = new MCSimpleAnalytics(Reference.VERSION,Reference.GA_GAMEKEY,Reference.GA_SECRETKEY);
         ModBlocks.init();
         ModItems.init();
         ModItems.initRecipes();
