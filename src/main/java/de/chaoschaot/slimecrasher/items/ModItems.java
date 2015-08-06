@@ -1,5 +1,6 @@
 package de.chaoschaot.slimecrasher.items;
 
+import de.chaoschaot.slimecrasher.blocks.ModBlocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -48,6 +49,8 @@ public class ModItems {
                 'S',
                 Items.stick
         );
+
+       crafting.addShapelessRecipe(new ItemStack(ModItems.compressedSlimeball,9), new ItemStack(ModBlocks.compressedSlimeblock,1));
     }
 
     public static Item.ToolMaterial compressedslime = EnumHelper.addToolMaterial("compressedslime",0,100,2.0F,0.0F,5);

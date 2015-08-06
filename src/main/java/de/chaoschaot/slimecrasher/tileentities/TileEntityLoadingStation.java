@@ -244,7 +244,9 @@ public class TileEntityLoadingStation extends TileEntity implements ISidedInvent
       for(int slot : inputSlots) {
          if(this.stationStacks[slot] != null) {
             if (this.stationStacks[slot].getItem() == ModItems.compressedSlimeball) {
-               consumeCompressedSlimeball();
+               if(consumeCompressedSlimeball(slot)) {
+                  break;
+               }
             }
             /** Curently disabled ;)
             else if (this.stationStacks[slot].getUnlocalizedName().equals("item.netherCrystal")) {
@@ -258,19 +260,16 @@ public class TileEntityLoadingStation extends TileEntity implements ISidedInvent
     * Handle the consume of an compressedSlimeball
     * @return true if consumed
     */
-   public boolean consumeCompressedSlimeball() {
+   public boolean consumeCompressedSlimeball(Integer slot) {
       ItemStack slimeCrasher = this.stationStacks[outputSlot];
-      if (slimeCrasher != null
-            && slimeCrasher.isItemDamaged()) {
-         for (int slot : inputSlots) {
-            if (this.stationStacks[slot] != null) {
-               if ((--this.stationStacks[slot].stackSize) <= 0) {
-                  this.stationStacks[slot] = null;
-               }
-               int max = Math.max(slimeCrasher.getItemDamage() - fuelAmount, 0);
-               slimeCrasher.setItemDamage(max);
-               return true;
+      if (slimeCrasher != null && slimeCrasher.isItemDamaged()) {
+         if (this.stationStacks[slot] != null) {
+            if ((--this.stationStacks[slot].stackSize) <= 0) {
+               this.stationStacks[slot] = null;
             }
+            int max = Math.max(slimeCrasher.getItemDamage() - fuelAmount, 0);
+            slimeCrasher.setItemDamage(max);
+            return true;
          }
       }
       return false;

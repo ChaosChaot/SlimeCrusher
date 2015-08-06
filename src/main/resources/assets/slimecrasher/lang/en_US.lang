@@ -2,3 +2,4 @@ item.slimecrasher_slimeCrasher.name=Slime Crusher
 item.slimecrasher_compressedSlimeball.name=Compressed Slimeball
 itemGroup.slimecrasher=Slime Crusher
 tile.slimecrasher_loadingStation.name=Loading Station
+tile.slimecrasher_compressedSlimeblock.name=Compressed Slimeblock
