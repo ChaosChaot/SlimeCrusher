@@ -30,12 +30,12 @@ public class BlockCompressedSlimeblock extends Block {
    @Override
    public void onEntityWalking(World world, int x, int y, int z, Entity entity) {
       Random random = world.rand;
-      double d0 = 0.0625D;
+      //double d0 = 0.0625D;
       for (int l = 0; l < 12; ++l) {
-         double d1 = (double) ((float) x + random.nextFloat() + d0);
-         double d2 = (double) ((float) y + random.nextFloat() + d0);
-         double d3 = (double) ((float) z + random.nextFloat() + d0);
-         world.spawnParticle("slime", d1, d2, d3 + d0, 0.0D, 0.0D, 0.0D);
+         double d1 = ( entity.posX - 0.5 + random.nextFloat());
+         double d2 = (y + 1 + random.nextFloat() * 0.1);
+         double d3 = ( entity.posZ - 0.5 + random.nextFloat());
+         world.spawnParticle("slime", d1, d2, d3, 0.0D, 0.0D, 0.0D);
       }
    }
 }
