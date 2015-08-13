@@ -23,7 +23,6 @@ public class BlockCompressedSlimeblock extends Block {
       this.setBlockName(Reference.MODID + "_" + name);
       this.setCreativeTab(SlimeCrasher.slimecrasherTab);
       this.setBlockTextureName(Reference.MODID + ":" + name);
-
       GameRegistry.registerBlock(this, name);
    }
 

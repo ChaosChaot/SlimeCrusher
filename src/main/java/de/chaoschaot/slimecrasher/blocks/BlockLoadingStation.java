@@ -1,6 +1,8 @@
 package de.chaoschaot.slimecrasher.blocks;
 
 import cpw.mods.fml.common.registry.GameRegistry;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import de.chaoschaot.slimecrasher.SlimeCrasher;
 import de.chaoschaot.slimecrasher.gui.GuiHandler;
 import de.chaoschaot.slimecrasher.lib.Reference;
@@ -8,11 +10,15 @@ import de.chaoschaot.slimecrasher.tileentities.TileEntityLoadingStation;
 import net.minecraft.block.Block;
 import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.material.Material;
+import net.minecraft.client.renderer.texture.IIconRegister;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.IIcon;
+import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 
 import java.util.Random;
@@ -21,6 +27,8 @@ public class BlockLoadingStation extends Block implements ITileEntityProvider {
 
    private String name = "loadingStation";
    protected Random direction = new Random();
+   @SideOnly(Side.CLIENT)
+   public IIcon[] icons = new IIcon[6];
 
    public BlockLoadingStation() {
       super(Material.anvil);
@@ -102,4 +110,46 @@ public class BlockLoadingStation extends Block implements ITileEntityProvider {
       super.breakBlock(world, x, y, z, block, hasTileEntity);
    }
 
+   @Override
+   public void registerBlockIcons(IIconRegister reg) {
+      for (int i = 0; i < 6; i++) {
+         if (i == 1) {
+            this.icons[i] = reg.registerIcon(this.textureName + "_top");
+         } else if (i == 3) {
+            this.icons[i] = reg.registerIcon(this.textureName + "_front");
+         } else {
+            this.icons[i] = reg.registerIcon(this.textureName + "_side");
+         }
+      }
+   }
+
+   @Override
+   public IIcon getIcon(int side, int meta) {
+      return side == 1 ? this.icons[1] : (side == 0 ? this.icons[0] : (side != meta ? this.icons[0] : this.icons[3]));
+   }
+
+   @Override
+   public void onBlockPlacedBy(World world, int x, int y, int z, EntityLivingBase livingBase, ItemStack itemStack) {
+      int l = MathHelper.floor_double((double) (livingBase.rotationYaw * 4.0F / 360.0F) + 0.5D) & 3;
+
+      if (l == 0)
+      {
+         world.setBlockMetadataWithNotify(x, y, z, 2, 2);
+      }
+
+      if (l == 1)
+      {
+         world.setBlockMetadataWithNotify(x, y, z, 5, 2);
+      }
+
+      if (l == 2)
+      {
+         world.setBlockMetadataWithNotify(x, y, z, 3, 2);
+      }
+
+      if (l == 3)
+      {
+         world.setBlockMetadataWithNotify(x, y, z, 4, 2);
+      }
+   }
 }
